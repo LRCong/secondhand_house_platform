@@ -1,22 +1,22 @@
 <template>
   <div class="container">
-    <a-layout :style="{ height: '100%'}">
+    <a-layout :style="{ height: '100%' }">
       <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
         <div class="logo" />
         <a-menu theme="dark" mode="inline" v-model:selectedKeys="selectedKeys">
-          <a-menu-item key="1">
+          <a-menu-item key="1" @click="transPage('house')">
             <BankOutlined />
             <span>二手房</span>
           </a-menu-item>
-          <a-menu-item key="2">
+          <a-menu-item key="2" @click="transPage('star')">
             <StarOutlined />
             <span>收藏</span>
           </a-menu-item>
-          <a-menu-item key="3">
+          <a-menu-item key="3" @click="transPage('order')">
             <TagsOutlined />
             <span>预约</span>
           </a-menu-item>
-          <a-menu-item key="4">
+          <a-menu-item key="4" @click="transPage('email')">
             <MessageOutlined />
             <span>消息</span>
           </a-menu-item>
@@ -42,9 +42,10 @@
             padding: '24px',
             background: '#fff',
             minHeight: '280px',
+            overflow: 'auto',
           }"
         >
-          Content
+          <router-view />
         </a-layout-content>
       </a-layout>
     </a-layout>
@@ -60,6 +61,7 @@ import {
   MenuFoldOutlined,
 } from "@ant-design/icons-vue";
 import { defineComponent, ref } from "vue";
+import router from "../router/index";
 export default defineComponent({
   components: {
     BankOutlined,
@@ -70,9 +72,12 @@ export default defineComponent({
     MenuFoldOutlined,
   },
   setup() {
+    const transPage = (to: string) => router.push(to);
+
     return {
       selectedKeys: ref<string[]>(["1"]),
       collapsed: ref<boolean>(false),
+      transPage,
     };
   },
 });
@@ -96,7 +101,7 @@ export default defineComponent({
 .container .logo {
   height: 32px;
   /* background: rgba(255, 255, 255, 0.3); */
-  background-image: url('src/assets/map.png');
+  background-image: url("/src/assets/map.png");
   background-size: 100%;
   background-position: center;
   margin: 16px;

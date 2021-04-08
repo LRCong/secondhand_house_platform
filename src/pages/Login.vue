@@ -14,20 +14,22 @@
 
 <script lang="ts">
 import { ref, defineComponent } from "vue";
+import router from "../router/index";
+
 export default defineComponent({
   name: "Login",
   setup() {
-    const username = ref('');
-    const password = ref('');
+    const username = ref("admin");
+    const password = ref("admin");
 
     const submitMethod = () => {
-        console.log(username.value, password.value);
+      router.push("/dashboard/house");
     };
 
     return {
-        username,
-        password,
-        submitMethod
+      username,
+      password,
+      submitMethod,
     };
   },
 });
