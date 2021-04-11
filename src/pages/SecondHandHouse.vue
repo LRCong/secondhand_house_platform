@@ -53,13 +53,12 @@
         <h3>区位：</h3>
         <a-select
           mode="multiple"
-          v-model:value="value"
+          v-model:value="filterAreas"
           style="width: 50%"
           placeholder="请选择区位"
-          @change="handleChange"
         >
-          <a-select-option v-for="i in 25" :key="(i + 9).toString(36) + i">
-            {{ (i + 9).toString(36) + i }}
+          <a-select-option v-for="item in area" :key="item.area_id">
+            {{ item.area_name }}
           </a-select-option>
         </a-select>
       </div>
@@ -67,13 +66,12 @@
         <h3>标签：</h3>
         <a-select
           mode="multiple"
-          v-model:value="value"
+          v-model:value="filterLabels"
           style="width: 50%"
           placeholder="请选择标签"
-          @change="handleChange"
         >
-          <a-select-option v-for="i in 25" :key="(i + 9).toString(36) + i">
-            {{ (i + 9).toString(36) + i }}
+          <a-select-option v-for="item in labels" :key="item.label_id">
+            {{ item.label_name }}
           </a-select-option>
         </a-select>
       </div>
@@ -81,8 +79,8 @@
     <div class="results-container">
       <div
         class="result-container"
-        v-for="i in 25"
-        :key="(i + 9).toString(36) + i"
+        v-for="item in filteredHouses"
+        :key="item.house_name"
       >
         <a-card hoverable style="width: 300px">
           <template #cover>
@@ -96,7 +94,7 @@
             <TagsOutlined key="预约" />
             <MessageOutlined key="私信" />
           </template>
-          <a-card-meta title="陈建军" description="南北通透，光照好">
+          <a-card-meta :title="`${item.house_name} | ${item.manager_name}`">
             <template #avatar>
               <a-avatar
                 src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
@@ -110,12 +108,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from "vue";
+import { defineComponent, ref, watch, computed, onMounted } from "vue";
 import {
   StarOutlined,
   TagsOutlined,
   MessageOutlined,
 } from "@ant-design/icons-vue";
+import { debounce } from "lodash";
+import { getFIlterHouse, HouseInfoLite } from "../api/FilterHouse";
+import { getLabels } from "../api/GetLabels";
+import { getAreas } from "../api/GetArea";
 
 export default defineComponent({
   components: {
@@ -124,25 +126,52 @@ export default defineComponent({
     MessageOutlined,
   },
   setup() {
-    onMounted(() =>
-      fetch("http://localhost:3000/api/house/getfilter", {
-        method: "post",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: "maxAge=18",
-      })
-    );
     const value1 = ref<number[]>([10, 20]);
     const value2 = ref<number[]>([5000, 10000]);
     const value3 = ref<number[]>([50, 100]);
     const disabled1 = ref<boolean>(false);
     const disabled2 = ref<boolean>(false);
     const disabled3 = ref<boolean>(false);
+    const filterLabels = ref<string[]>([]);
+    const filterAreas = ref<string[]>([]);
+    const filterOption = computed(() => {
+      return {
+        maxAge: value1.value[1],
+        minAge: value1.value[0],
+        maxPrice: value2.value[1],
+        minPrice: value2.value[0],
+        maxCover: value3.value[1],
+        minCover: value3.value[0],
+        label: filterLabels.value.map((value) => Number(value)),
+        Area: filterAreas.value.map((value) => Number(value)),
+      };
+    });
 
-    const handleChange = (value: string[]) => {
-      console.log(`selected ${value}`);
-    };
+    const labels = ref<{ label_id: number; label_name: string }[]>([]);
+    onMounted(async () => {
+      let res = await getLabels();
+      labels.value = res;
+    });
+
+    const area = ref<{ area_name: string; area_id: number }[]>([]);
+    onMounted(async () => {
+      let res = await getAreas();
+      console.log(res);
+      area.value = res;
+    });
+
+    const filteredHouses = ref<HouseInfoLite[]>([]);
+    watch(
+      filterOption,
+      debounce(async () => {
+        let res = await getFIlterHouse(filterOption.value);
+        filteredHouses.value = res;
+      }, 500)
+    );
+    onMounted(async () => {
+      let res = await getFIlterHouse(filterOption.value);
+      filteredHouses.value = res;
+    });
 
     return {
       value1,
@@ -151,7 +180,11 @@ export default defineComponent({
       disabled1,
       disabled2,
       disabled3,
-      handleChange,
+      filterLabels,
+      filterAreas,
+      filteredHouses,
+      labels,
+      area,
       value: ref(["a1", "b2"]),
     };
   },
