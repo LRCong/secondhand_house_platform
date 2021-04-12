@@ -10,10 +10,11 @@ export interface FilterHouseDto {
 }
 
 export interface HouseInfoLite {
-    readonly ifStar: boolean;
-    readonly ifOrder: boolean;
+    ifStar: boolean;
+    ifOrder: boolean;
     readonly house_name: string;
     readonly manager_name: string;
+    readonly house_id: number;
 }
 
 export const getFIlterHouse = async (option: FilterHouseDto): Promise<HouseInfoLite[]> => {

@@ -10,13 +10,13 @@
           </a-menu-item>
           <a-menu-item key="2" @click="transPage('star')">
             <StarOutlined />
-            <span>收藏</span>
+            <span>收藏和预约</span>
           </a-menu-item>
-          <a-menu-item key="3" @click="transPage('order')">
+          <!-- <a-menu-item key="3" @click="transPage('order')">
             <TagsOutlined />
-            <span>预约</span>
-          </a-menu-item>
-          <a-menu-item key="4" @click="transPage('email')">
+            <span>预约</span> -->
+          <!-- </a-menu-item> -->
+          <a-menu-item key="3" @click="transPage('email')">
             <MessageOutlined />
             <span>消息</span>
           </a-menu-item>

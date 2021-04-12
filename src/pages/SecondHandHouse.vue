@@ -90,9 +90,27 @@
             />
           </template>
           <template class="ant-card-actions" #actions>
-            <StarOutlined key="收藏" />
-            <TagsOutlined key="预约" />
-            <MessageOutlined key="私信" />
+            <StarOutlined
+              key="收藏"
+              v-if="!item.ifStar"
+              @click="bindStar(1, item.house_id)"
+            />
+            <StarFilled
+              key="收藏"
+              v-if="item.ifStar"
+              @click="bindStar(1, item.house_id)"
+            />
+            <TagsOutlined
+              key="预约"
+              v-if="!item.ifOrder"
+              @click="bindOrder(1, item.house_id)"
+            />
+            <TagsFilled
+              key="预约"
+              v-if="item.ifOrder"
+              @click="bindOrder(1, item.house_id)"
+            />
+            <MessageOutlined key="私信" @click="sayHello" />
           </template>
           <a-card-meta :title="`${item.house_name} | ${item.manager_name}`">
             <template #avatar>
@@ -113,17 +131,26 @@ import {
   StarOutlined,
   TagsOutlined,
   MessageOutlined,
+  StarFilled,
+  TagsFilled,
+  MessageFilled,
 } from "@ant-design/icons-vue";
 import { debounce } from "lodash";
+import router from "../router/index";
 import { getFIlterHouse, HouseInfoLite } from "../api/FilterHouse";
 import { getLabels } from "../api/GetLabels";
 import { getAreas } from "../api/GetArea";
+import { addStar, addOrder } from "../api/Star";
+import { hello } from "../api/Message";
 
 export default defineComponent({
   components: {
     StarOutlined,
     TagsOutlined,
     MessageOutlined,
+    StarFilled,
+    TagsFilled,
+    MessageFilled,
   },
   setup() {
     const value1 = ref<number[]>([10, 20]);
@@ -173,6 +200,29 @@ export default defineComponent({
       filteredHouses.value = res;
     });
 
+    const bindStar = async (consumer_id: number, house_id: number) => {
+      await addStar(consumer_id, house_id);
+      (filteredHouses.value.find(
+        (value) => value.house_id === house_id
+      ) as any).ifStar = !(filteredHouses.value.find(
+        (value) => value.house_id === house_id
+      ) as any).ifStar;
+    };
+
+    const bindOrder = async (consumer_id: number, house_id: number) => {
+      await addOrder(consumer_id, house_id);
+      (filteredHouses.value.find(
+        (value) => value.house_id === house_id
+      ) as any).ifOrder = !(filteredHouses.value.find(
+        (value) => value.house_id === house_id
+      ) as any).ifOrder;
+    };
+
+    const sayHello = async (consumer_id: number) => {
+      await hello(1, 1);
+      router.push("email");
+    };
+
     return {
       value1,
       value2,
@@ -186,6 +236,9 @@ export default defineComponent({
       labels,
       area,
       value: ref(["a1", "b2"]),
+      bindStar,
+      bindOrder,
+      sayHello,
     };
   },
 });
